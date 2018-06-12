@@ -1,5 +1,5 @@
 /**
- * Sample React Native App
+ * Sample React Native App Demo
  * https://github.com/facebook/react-native
  * @auther jiangronghua
  */
