@@ -6,79 +6,87 @@
 
 import React, { Component } from 'react';
 import {
-  Platform,
   StyleSheet,
   Text,
   Button,
   View
 } from 'react-native';
-import { StackNavigator, TabNavigator } from 'react-navigation'
+import { createStackNavigator } from 'react-navigation'
 
-import ChatScreen from './src/ChatScreen';
-import MinePage from './src/MinePage';
-
-class HomePage extends React.Component{
-    static navigationOptions={
-        title: '首页',//设置标题内容
-        header:{
-            backTitle: ' ',//返回按钮标题内容（默认为上一级标题内容）
-        }
-    }
-    constructor(props) {
-        super(props);
-    }
-    render() {
-        const {navigate} = this.props.navigation;
+class HomeScreen extends Component<{}> {
+    static navigationOptions = {
+        title: '首页'
+    };
+    render () {
         return (
             <View style={styles.container}>
-                <Text style={{padding:10}}>Hello, Navigation!</Text>
-                <Button
-                    onPress={() => navigate('Chat',{user:'Sybil'})}
-                    title="点击跳转"/>
+                <Text>个人主页</Text>
+                {/* <Button title="跳转到详情页" onPress={() => this.props.navigation.navigate('Details')}></Button> */}
+                <Button 
+                    title="跳转到详情页"
+                    onPress={() => {
+                        this.props.navigation.navigate('Details', {
+                            itemId: 86,
+                            otherParam: '传过来的字符串参数'
+                        })
+                    }}
+                />
             </View>
         )
     }
 }
 
-const MainScreenNavigator = TabNavigator({
-    Home: {
-        screen: HomePage,
-        navigationOptions: {
-            tabBarLabel: '首页'
+class DetailScreen extends Component<{}> {
+    static navigationOptions = ({ navigation, navigationOptions }) => {
+        const { params } = navigation.state
+        // title: '详情页'
+        return {
+            title: params ? params.otherParam : '默认标题',
+            headerStyle: {
+                backgroundColor: navigationOptions.headerTintColor
+            },
+            headerTintColor: navigationOptions.headerStyle.backgroundColor
         }
-    },
-    Certificate: {
-        screen: MinePage,
-        navigationOptions: {
-            tabBarLabel: '我的'
-        }
-    },
+    };
+    render () {
+        const { navigation } = this.props;
+        const itemId = navigation.getParam('itemId', 'NO-ID');
+        const otherParam = navigation.getParam('otherParam', '初始化参数')
+        return (
+            <View style={styles.container}>
+                <Text>主页详情</Text>
+                <Text>itemId: {JSON.stringify(itemId)}</Text>
+                <Text>itemId: {JSON.stringify(otherParam)}</Text>
+                <Button title="再次跳转到详情页" onPress={() => this.props.navigation.push('Details')}></Button>
+                <Button title="跳转到主页" onPress={() => this.props.navigation.navigate('Home')}/>
+                <Button title="返回" onPress={() => this.props.navigation.goBack()}/>
+                <Button title="修改标题" onPress={() => this.props.navigation.setParams({otherParam: '点击标题'})}/>
+            </View>
+        )
+    }
+}
+
+const RootStack = createStackNavigator({
+    Home: HomeScreen,
+    Details: DetailScreen
 }, {
-    animationEnabled: false, // 切换页面时不显示动画
-    tabBarPosition: 'bottom', // 显示在底端，android 默认是显示在页面顶端的
-    swipeEnabled: false, // 禁止左右滑动
-    backBehavior: 'none', // 按 back 键是否跳转到第一个 Tab， none 为不跳转
-    tabBarOptions: {
-        activeTintColor: '#008AC9', // 文字和图片选中颜色
-        inactiveTintColor: '#999', // 文字和图片默认颜色
-        showIcon: true, // android 默认不显示 icon, 需要设置为 true 才会显示
-        indicatorStyle: {height: 0}, // android 中TabBar下面会显示一条线，高度设为 0 后就不显示线了
-        style: {
-            backgroundColor: '#fff', // TabBar 背景色
+    initialRouteName: 'Home',
+    navigationOptions: {
+        headerStyle: {
+            backgroundColor: '#f4511e'
         },
-        labelStyle: {
-            fontSize: 12, // 文字大小
-        },
-    },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+            fontWeight: 'bold'
+        }
+    }
 });
 
-const MainApp = StackNavigator({
-    Home: {screen: MainScreenNavigator},
-    Chat:{screen:ChatScreen},
-
-});
-
-export default MainApp;
+export default class App extends React.Component {
+    render() {
+        return <RootStack />;
+    }
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -86,10 +94,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
   }
 });
